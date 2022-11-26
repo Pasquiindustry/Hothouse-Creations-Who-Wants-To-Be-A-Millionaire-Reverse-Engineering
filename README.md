@@ -40,6 +40,8 @@ Which files are on the PlayStation disc?
 
 The structure of the STY file
 ----------
+:white_check_mark: **Decoded**
+
 *Note: I don't think I can put the data here to make an example, so I'll make a picture with the scheme, just to be more clear.
 The STY file is what contains any other file. This file is not encrypted or compressed, but it seems a non-standard format. This seems to be how it's structured sequentially:
 * **4 bytes** - The size of the header containing data about the files in the list. More on that later. The count includes these 4 bytes.
@@ -52,27 +54,52 @@ After the header, all the files are subsequential until the end of the file.
 
 The PSM file format
 ----------
+:thinking: **Hypotetical use**
+:x: **Unkown format**
+
 Unfortunately I haven't found which format are these encoded, altough I'm pretty sure these are the video clips.
 
 The 3Minutes file
 ----------
+:x: **Unknown usage**
+
 This file is a mystery at the moment, since contains a random pattern with the names of the developers.
 
 The SSL File
 ----------
-This contains the audio clips. The clips are placed sequentially inside this file, but I haven't found a way to decode it properly yet. I think there isn't only raw audio data here. 
-I tried to put this file in Audacity and, with some tweaks, I can barely listen to the presenter voice (Gerry Scotti in my case) with a lot of noise
+:white_check_mark: **Known use**
+:thinking: **Partially Decoded**
+
+This contains the audio clips, including both the speech and the music. Sincie it's on PlayStation, this should be a PS-ADPCM format.
+A tool like PSound can play and convert this file to wav.
+* **4 bytes** - The size of the header. In this case I haven't figured out if these 4 bytes are included or not.
+* A list of two values
+
+  * **4 bytes** - The offset in number of blocks. A block is 2048 bytes
+  * **4 bytes** - The size of the sample. :thinking: *Not sure if this value is in number of blocks or bytes*
+  
+* **? bytes** - there are some bytes containing ANSI text. They seems referencing some images
+* All the audio clip data, in sequential order.
 
 The EGG Files
 ----------
+:white_check_mark: **Known use**
+:thinking: **Partially Decoded**
+
 This seems to contains part of the textures of the game. I haven't found the extact codec, but it should be a raw bitmap. Just need to find the size of the file and the bit depth
 
 The PFF Files
 ----------
+:white_check_mark: **Known use**
+:thinking: **Partially Decoded**
+
 These seems to include the fonts with some metadata. There are multiple files, each for different sizes
 
 The TSB File
 ----------
+:white_check_mark: **Known use**
+:thinking: **Partially Decoded**
+
 The first important file for the question database. This contains the character map and, maybe, other data. This seems ANSI compliant too.
 The letters inside the db files don't use an ANSI encoding, but refers - with an offset - to this file.
 I think there's more to this file, but it's yet to be discovered.
@@ -82,30 +109,37 @@ For example, if in the db file is used the word `02 00`, the letter to get is at
 
 The DB Files
 ----------
+:white_check_mark: **Known use**
+:thinking: **Partially Decoded**
+
 This contains the question database, alongsize the answers and soem metadata. This is the structure (Not complete at the moment)
 * 2048 bytes for the header. I haven't fully decoded these, but I can find some familiar values
-* * The words at 0x02 and 0x08 value is equal to the block size. Maybe one indicates the size of the header and the other the size of the question area
-* * The word at 0x06 contains the number of the questions. In the italian version it seems there are 1011 questions.
-* * The word at 0x04 is 14, the maximum value for the difficulty (0-14 -> 15 values)
-* * From 0x0E to the end of the header, there are multiple words in sequence, ranging from 1 to 16384. I think this is one indicator for the difficulty of the question, since the range is from log2(1) = 0 to log2(16384) = 14. 15 different values in total. There are some 0x00 values until the end of the header should serve as padding. 
+
+  * The words at 0x02 and 0x08 value is equal to the block size. Maybe one indicates the size of the header and the other the size of the question area
+  * The word at 0x06 contains the number of the questions. In the italian version it seems there are 1011 questions.
+  * The word at 0x04 is 14, the maximum value for the difficulty (0-14 -> 15 values)
+  * From 0x0E to the end of the header, there are multiple words in sequence, ranging from 1 to 16384. I think this is one indicator for the difficulty of the question, since the range is from log2(1) = 0 to log2(16384) = 14. 15 different values in total. There are some 0x00 values until the end of the header should serve as padding. 
+
 * 2048 bytes for each question in sequence.
-* * **4 bytes** - Seems an unique numeric ID for the question
-* * **2 bytes** - The difficulty of the question? This seems a redundant value found inside the header.
-* * **1024 bytes** - The question. Any word is a letter. The values are indexes to be used as offset in the TDB file.
-* * **128 bytes** - The answer A
-* * **2 bytes** - Unknown. This doesn't seem to be part of the letters
-* * **128 bytes** - The answer B
-* * **2 bytes** - Unknown. This doesn't seem to be part of the letters
-* * **128 bytes** - The answer C
-* * **2 bytes** - Unknown. This doesn't seem to be part of the letters
-* * **128 bytes** - The answer D
-* * **500 bytes** - The metadata of the question. Only six bytes seems to indicate something. All the other bytes are 0x00, with a 0x01 to end the section.
-* * * **1byte** - Unknown
-* * * **1byte** - Unknown
-* * * **1byte** - The correct answer, in range 0 - 3
-* * * **1byte** - Maybe the answer given by the phone call, in range 0 - 3. This is almost always identical to the answer.
-* * * **1byte** - Maybe the remaining option - alongside the correct answer - while using a 50:50 help, in range 0 - 3. All the values seems different from the correct answer, which led me to think this is what it is.
-* * * **1byte** - Unknown
+
+  * **4 bytes** - Seems an unique numeric ID for the question
+  * **2 bytes** - The difficulty of the question? This seems a redundant value found inside the header.
+  * **1024 bytes** - The question. Any word is a letter. The values are indexes to be used as offset in the TDB file.
+  * **128 bytes** - The answer A
+  * **2 bytes** - :x: Unknown. This doesn't seem to be part of the letters
+  * **128 bytes** - The answer B
+  * **2 bytes** - :x: Unknown. This doesn't seem to be part of the letters
+  * **128 bytes** - The answer C
+  * **2 bytes** - :x: Unknown. This doesn't seem to be part of the letters
+  * **128 bytes** - The answer D
+  * **500 bytes** - The metadata of the question. Only six bytes seems to indicate something. All the other bytes are 0x00, with a 0x01 to end the section.
+  
+    * **1byte** - :x: Unknown
+    * **1byte** - :x: Unknown
+    * **1byte** - The correct answer, in range 0 - 3
+    * **1byte** - Maybe the answer given by the phone call, in range 0 - 3. This is almost always identical to the answer.
+    * **1byte** - Maybe the remaining option - alongside the correct answer - while using a 50:50 help, in range 0 - 3. All the values seems different from the correct answer, which led me to think this is what it is.
+    * **1byte** - :x: Unknown
 
 Conclusion
 ----------
