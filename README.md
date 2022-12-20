@@ -126,19 +126,18 @@ This contains the question database, alongsize the answers and soem metadata. Th
   * **2 bytes** - The difficulty of the question? This seems a redundant value found inside the header.
   * **1024 bytes** - The question. Any word is a letter. The values are indexes to be used as offset in the TDB file.
   * **128 bytes** - The answer A
-  * **2 bytes** - :x: Unknown. This doesn't seem to be part of the letters
+  * **2 bytes** - The percentage of the help of the public for the answer A. It seems there are two possible values, one for each byte.
   * **128 bytes** - The answer B
-  * **2 bytes** - :x: Unknown. This doesn't seem to be part of the letters
+  * **2 bytes** - The percentage of the help of the public for the answer B. It seems there are two possible values, one for each byte.
   * **128 bytes** - The answer C
-  * **2 bytes** - :x: Unknown. This doesn't seem to be part of the letters
+  * **2 bytes** - The percentage of the help of the public for the answer C. It seems there are two possible values, one for each byte.
   * **128 bytes** - The answer D
-  * **500 bytes** - The metadata of the question. Only six bytes seems to indicate something. All the other bytes are 0x00, with a 0x01 to end the section.
+  * **2 bytes** - The percentage of the help of the public for the answer D. It seems there are two possible values, one for each byte.
+  * **498 bytes** - The metadata of the question. Only six bytes seems to indicate something. All the other bytes are 0x00, with a 0x01 to end the section.
   
-    * **1byte** - :x: Unknown
-    * **1byte** - :x: Unknown
     * **1byte** - The correct answer, in range 0 - 3
-    * **1byte** - Maybe the answer given by the phone call, in range 0 - 3. This is almost always identical to the answer.
-    * **1byte** - Maybe the remaining option - alongside the correct answer - while using a 50:50 help, in range 0 - 3. All the values seems different from the correct answer, which led me to think this is what it is.
+    * **1byte** - The answer given by the phone call, in range 0 - 4. This is almost always identical to the answer. A value of 4 indicates that the helper doesn't know how to answer.
+    * **1byte** - The remaining option - alongside the correct answer - while using a 50:50 help, in range 0 - 3. All the values seems different from the correct answer, which led me to think this is what it is.
     * **1byte** - :x: Unknown
 
 Conclusion
