@@ -72,7 +72,7 @@ The SSL File
 
 This contains the audio clips, including both the speech and the music. Sincie it's on PlayStation, this should be a PS-ADPCM format.
 A tool like PSound can play and convert this file to wav.
-* **4 bytes** - The size of the header. In this case I haven't figured out if these 4 bytes are included or not.
+* **4 bytes** - The size of the header. These 4 bytes are excluded from the count.
 * A list of two values
 
   * **4 bytes** - The offset in number of blocks. A block is 2048 bytes
@@ -86,7 +86,12 @@ The EGG Files
 :white_check_mark: **Known use**
 :thinking: **Partially Decoded**
 
-This seems to contains part of the textures of the game. I haven't found the extact codec, but it should be a raw bitmap. Just need to find the size of the file and the bit depth
+This is the container of the textures (Excluding the alphabet)
+It seems this file can contain images in two different variants
+* Raw 8 bit depth bitmap textures with a separate palette (CLUT). (Width) 512px x (height) 256px. Maybe is related to the TIM file format.
+* Unknown, maybe compressed, data, which should contain all the backgrounds and the big pictures (E.g. the check in the game over screen)
+
+Even if there's a file signature EGG, this format is a non-standard and non-documented format.
 
 The PFF Files
 ----------
@@ -138,7 +143,7 @@ This contains the question database, alongsize the answers and soem metadata. Th
     * **1byte** - The correct answer, in range 0 - 3
     * **1byte** - The answer given by the phone call, in range 0 - 4. This is almost always identical to the answer. A value of 4 indicates that the helper doesn't know how to answer.
     * **1byte** - The remaining option - alongside the correct answer - while using a 50:50 help, in range 0 - 3. All the values seems different from the correct answer, which led me to think this is what it is.
-    * **1byte** - :x: Unknown
+    * **1byte** - Probably which person will respond to the phone. In the italian version there are 10 different persons.
 
 Conclusion
 ----------
