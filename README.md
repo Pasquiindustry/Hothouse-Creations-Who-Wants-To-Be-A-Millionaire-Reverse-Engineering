@@ -1,8 +1,8 @@
-Welcome to this new project, where I'm trying to reverse engineer the series of games of **Who Wants To Be A Millionaire** developed by Hothouse Creations.
+Welcome to this new project, where I'm trying to reverse engineer the assets files of the series of games of **Who Wants To Be A Millionaire** developed by Hothouse Creations.
 
 Why?
 ----------
-One of the first games I played was *Chi Vuol Essere Miliardario* per PlayStation, which is the italian version of the game. One day I decided I wanted to add my own questions to the game and, maybe, do more things.
+One of the first games I played was *Chi Vuol Essere Miliardario* for PlayStation, which is the italian version of the game. One day I decided I wanted to add my own questions to the game and, maybe, do more things.
 
 Important notes
 ----------
@@ -18,7 +18,7 @@ The main goals of this project are:
 * Decode the STY file, which seems to be a unique file created by Hothouse Creations
 * Decode the files containing the database with all the questions and their metadata
 * Get the high quality voice samples, as heard during the gameplay
-* Get the videos as played on the various platforms
+* Get all the other media
 
 Tested on...
 ----------
@@ -86,10 +86,28 @@ The EGG Files
 :white_check_mark: **Known use**
 :thinking: **Partially Decoded**
 
-This is the container of the textures (Excluding the alphabet)
-It seems this file can contain images in two different variants
-* Raw 8 bit depth bitmap textures with a separate palette (CLUT). (Width) 512px x (height) 256px. Maybe is related to the TIM file format.
-* Unknown, maybe compressed, data, which should contain all the backgrounds and the big pictures (E.g. the check in the game over screen)
+This is a container with mixed image formats inside, used for sprites and background images. Fonts are included in another file format.
+We can divide the structure of this file in three areas:
+* The header for the entire file, divided in two parts
+* The data for the TIM-like sprites. I'll refer to these as TIM files even though they doesn't seem to contain any header for the "standard" TIM file. More on that later.
+* The data for the SB-like backgrounds. I'll refer to these as SB files
+
+* The first part of the header seems to be always 16 byte long and is structured like this
+  * **4 bytes** - The file signature, always 45 47 47 00 or EGG
+  * **4 bytes** - The number of bytes for some data about the TIM images
+  * **4 bytes** - The number of bytes for the offsets of the BS images
+  * **2 bytes** - Unknown. It's always 0x00 inside all the files I analyzed
+  * **2 bytes** - The number of TIM images multiplied by 2. Maybe it's indicating another thing, but the data corresponds with this idea
+ 
+* The second part of the header contains some additional info about the TIM and the BS images
+  * The data about the TIM files are currently unknown
+  * The SB data contains only the offset for all the SB files. These are a series of 4 bytes long values. The first one is always 00 00 00 00
+ 
+* Immediately after the header data, we can see the TIM files in series. Any TIM file is big 131072 bytes, which is the same number as the number of pixels of the game resolution (512x256)
+  Like a TIM file, the images use a CLUT system, where any pixel has the index to the color in a palette (CLUT = Color Look Up Table), also defined inside the same 512x256 bytes. I don't have the exact structure of this file for here.
+
+* Immediately after the TIM files, we can see the SB files in series. These are also known as the single frames inside the .STR video files. These are compressed 256x256 images.
+  The SB files contains all the necessary header of the file and can be read with an official tool such as MC32 (AKA Movie Converter). I got almost no issue reading them with the Version 3.4 of the tool.
 
 Even if there's a file signature EGG, this format is a non-standard and non-documented format.
 
@@ -98,7 +116,7 @@ The PFF Files
 :white_check_mark: **Known use**
 :thinking: **Partially Decoded**
 
-These seems to include the fonts with some metadata. There are multiple files, each for different sizes
+These seems to include the fonts with some metadata. There are multiple files, each for different sizes.
 
 The TSB File
 ----------
