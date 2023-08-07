@@ -45,10 +45,12 @@ The structure of the STY file
 *Note: I don't think I can put the data here to make an example, so I'll make a picture with the scheme, just to be more clear.
 The STY file is what contains any other file. This file is not encrypted or compressed, but it seems a non-standard format. This seems to be how it's structured sequentially:
 * **4 bytes** - The size of the header containing data about the files in the list. More on that later. The count includes these 4 bytes.
-* **4 bytes** - The number of files in the next succession. If the value is - for example - 7, there will be 7 subsequential files metadata. This value doesn't indicate all the files available inside the STY, as there may be other successions of files.
+* **4 bytes** - The number of files in the next succession. If the value is - for example - 7, there will be 7 subsequential files metadata. This succession of files are all placed inside the same directory. The first succession is placed inside the root folder.
 * **24 bytes** - The file name. Seems to be compliant with the ANSI format and they're readable easily with a text editor
-* **4 files** - The size of the file in bytes. There are folders too in this list, which are indicated as big 0 bytes
-* **4 bytes** - The offset of the file relative to the beginning of the file. This value seems to be in "blocks", with 1 block big 2048 bytes. So, to get the right offset, you've to multiply the value by 2048
+* **4 files** - The size of the file in bytes. There are folders too in this list, which are indicated as big as 0 bytes
+* **4 bytes** - This value indicates two different things if the item is a file or a folder
+ * In a file, this value is the offset of where the data is located inside the STY. This number is in number of blocks, so you've to multiply this by 2048 to get the exact offset.
+ * In a directory, this value is the offset of the succession of files available inside the folder, relative to the header
 
 After the header, all the files are subsequential until the end of the file.
 
@@ -70,13 +72,18 @@ The SSL File
 :white_check_mark: **Known use**
 :thinking: **Partially Decoded**
 
-This contains the audio clips, including both the speech and the music. Sincie it's on PlayStation, this should be a PS-ADPCM format.
-A tool like PSound can play and convert this file to wav.
+This contains the audio clips, including both the speech and the music. Sincie it's on PlayStation, this should be a PS-ADPCM format, like an headerless VAG file.
+Tools like PSound, Vgmstream and Wav2Vag can play and convert this file to wav.
 * **4 bytes** - The size of the header. These 4 bytes are excluded from the count.
 * A list of two values
 
   * **4 bytes** - The offset in number of blocks. A block is 2048 bytes
-  * **4 bytes** - The size of the sample. :thinking: *Not sure if this value is in number of blocks or bytes*
+  * **2 bytes** - The size of the sample in number of blocks
+  * **1 byte** - A value that indicates different "variants" of the audio.
+    The most common value is 0, which indicates a 22050Hz 1 channel audio clip.
+    Other values found are 1 and 3, which are currently unknown. It seems they both define a stereo audio clip. It's possible to still play the clips without major issues from inside the game if we change this value to 0.
+    Sounds with a value of 1 seems dedicated to intros and idents
+    Sounds with a value of 3 seems dedicated to background music.
   
 * **? bytes** - there are some bytes containing ANSI text. They seems referencing some images
 * All the audio clip data, in sequential order.
@@ -136,6 +143,7 @@ The DB Files
 :thinking: **Partially Decoded**
 
 This contains the question database, alongsize the answers and soem metadata. This is the structure (Not complete at the moment)
+Important note: this is mostly valid for the question database. The fast-finger database - for example - seems to slightly differ.
 * 2048 bytes for the header. I haven't fully decoded these, but I can find some familiar values
 
   * The words at 0x02 and 0x08 value is equal to the block size. Maybe one indicates the size of the header and the other the size of the question area
@@ -160,7 +168,7 @@ This contains the question database, alongsize the answers and soem metadata. Th
   
     * **1byte** - The correct answer, in range 0 - 3
     * **1byte** - The answer given by the phone call, in range 0 - 4. This is almost always identical to the answer. A value of 4 indicates that the helper doesn't know how to answer.
-    * **1byte** - The remaining option - alongside the correct answer - while using a 50:50 help, in range 0 - 3. All the values seems different from the correct answer, which led me to think this is what it is.
+    * **1byte** - The remaining wrong possible answer while using a 50:50 help, in range 0 - 3.
     * **1byte** - Probably which person will respond to the phone. In the italian version there are 10 different persons.
 
 Conclusion
